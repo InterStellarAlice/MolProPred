@@ -11,6 +11,3 @@
 ## task
 
 [Predicting Molecular Properties](https://www.kaggle.com/competitions/champs-scalar-coupling)
-
-[notebook: SchNet Starter Kit](https://www.kaggle.com/code/toshik/schnet-starter-kit/notebook)
-
