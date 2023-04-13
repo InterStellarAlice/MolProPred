@@ -14,17 +14,3 @@
 
 [notebook: SchNet Starter Kit](https://www.kaggle.com/code/toshik/schnet-starter-kit/notebook)
 
-## materials
-
-[3B1B: but what is neural network?](https://www.youtube.com/watch?v=aircAruvnKk)
-
-[deeplearningbook-chinese](https://exacity.github.io/deeplearningbook-chinese/)
-
-[hands-on tutorial for the library `Chainer` using google colab](https://www.youtube.com/watch?v=KsoagCUQa5c)
-
-[github repo: chainer-chemistry](https://github.com/chainer/chainer-chemistry)
-
-original literatures of SchNet:
-
-* [SchNet: A continuous-filter convolutional neural network for modeling quantum interactions](https://arxiv.org/pdf/1706.08566.pdf)
-* [SchNet - a deep learning architecture for molecule and materials](https://arxiv.org/pdf/1712.06113.pdf)
