@@ -23,6 +23,8 @@
 * [SchNetPack - Deep Neural Networks for Atomistic Systems](https://github.com/atomistic-machine-learning/schnetpack) package with commits **last week** !!
 * [github repo:Molecular Scalar Coupling Constant Prediction using SchNet](https://github.com/jmg764/Molecular-Scalar-Coupling-Constant-Prediction-using-SchNet)
 * [model in chainer-chemistry: schnet.py](https://github.com/chainer/chainer-chemistry/blob/master/chainer_chemistry/models/schnet.py)
+* [schnet's default activation functions](https://schnetpack.readthedocs.io/en/stable/_modules/schnetpack/nn/activations.html)
+* [torch.nn.functional(alternative)](https://pytorch.org/docs/stable/nn.functional.html)
 
 ## Literature reviews on SchNet
 original papers:
