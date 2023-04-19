@@ -76,3 +76,159 @@ A more powerful representation of a molecule is as a 2D graph. In this represent
 In addition to representing molecules as 2D graphs, it is also possible to represent them in 3D Euclidean space. This can be useful for modeling the spatial arrangement of atoms in a molecule.
 
 The SchNet algorithm utilized in our project incorporates meticulously crafted layers that adeptly capture local correlations and facilitate atom-wise updating through continuous filter convolution. By effectively encoding 3D distance information to molecular GNN, SchNet has served as a source of inspiration for numerous subsequent works.
+
+# Introduction to SchNet
+SchNet: model atomistic systems by making use of continuous-filter convolutional layers(model interaction between atoms).
+
+Allow to model complex atomic interactions.
+
+- Predict potential energy surfaces.
+- Speed up the exploration of chemical space.
+
+Consider fundamental symmetries of atomistic systems.
+
+- Rotational and translational invariance as well as invariance to atom indexing.
+
+## Method
+SchNet is a variant of the earlier proposed Deep Tensor Neural Networks(DTNN).
+- DTNN: interactions are modeled by tensor layers, i.e., atom representations and interatomic distances are combined using a parameter tensor. 
+- SchNet: makes use of continuous-filter convolutions with filter-generating networks to model the interaction term.
+
+At each layer, the molecule is represented atom-wise analogous to pixels in an image.
+
+Interactions between atoms are modeled by the three interaction blocks.
+
+The final prediction is obtained after atom-wise updates of the feature representation and pooling of the resulting atom-wise energy. 
+
+## Molecular representation
+Nuclear charges $Z=(Z_1,…,Z_n)$
+
+Positions $ R=(\mathbf r_1,…,\mathbf r_n)$
+
+The atoms are described by a tuple of features $X^l=(\mathbf x_1^l…,\mathbf x_l^l)$
+- $\mathbf x_i^l \inℝ^F$, $F$: number of feature maps
+- $n$: number of atoms
+- $l$: current layer
+$\mathbf x_i^0$ is initialized using an embedding dependent on the atom type $Z_i$:
+
+$$
+\mathbf{x}_{i}^{0}=\mathbf{a}_{Z_i}.
+$$
+
+The atom type embeddings $\mathbf{a}_{Z}$ are initialized randomly and optimized during training.
+
+## Atom-wise layers
+Are dense layers.
+
+Applied separately to the representations $\mathbf x_i^l$ of each atom $i$:
+
+$$
+\mathbf{x}_{i}^{l+1}=W^l\mathbf{x}_{i}^{l}+\mathbf{b}^l,
+$$
+- Weights $W^l$ and biases $\mathbf b^l$ are shared across atoms.
+- The architecture remains scalable with respect to the number of atoms.
+
+These layers are responsible for the recombination of feature maps.
+
+## Interaction blocks
+Updating the atomic representations based on pair-wise interactions with the surrounding atoms.
+
+Continuous-filter convolutional layers, a generalization of the discrete convolutional layers commonly used.
+- Atoms are located at arbitrary positions.
+
+Model the filters continuously with a filter-generation neural network $W^l$ that maps the atom positions to the corresponding values of the filter bank.
+
+$$
+\begin{aligned}
+\mathbf{x}_{i}^{l+1}&=\left( X^l*W^l \right) _i\\
+&=\mathbf{x}_{j}^{l}\circ W^l\left( \mathbf{r}_j-\mathbf{r}_i \right) .
+\end{aligned}
+$$
+
+Activation functions: shifted softplus:
+$$
+\operatorname{ssp}(x)=\ln(0.5 \mathrm{e}^x+0.5).
+$$
+- ssp(0) = 0.
+- Improves the convergence of the network while having infinite order of continuity.
+
+Obtain:
+- smooth potential energy surfaces.
+- force fields.
+- second derivatives that are required for training with forces as well as the calculation of vibrational modes.
+
+## Filter-generating networks
+Determines how interactions between atoms are modeled.
+
+Constrain the model and include chemical knowledge.
+
+Input: a fully-connected neural network that takes the vector pointing from atom $i$ to its neighbor $j$.
+
+Rotationally invariant: requirements for modeling molecular energies. Obtained by using interatomic distances:
+
+$$
+d_{ij}=\lVert \mathbf{r}_i-\mathbf{r}_j \rVert 
+$$
+
+### Rotationally invariant
+
+Filters would be highly correlated: a neural network after initialization is close to linear.
+
+Expand the distances in a basis of Gaussians:
+
+$$
+e_k\left( \mathbf{r}_i-\mathbf{r}_j \right) =\exp \left[ -\gamma \left( \lVert \mathbf{r}_i-\mathbf{r}_j \rVert -\mu _k \right) ^2 \right] 
+$$
+
+- $\mu_k$: chosen on a uniform grid between zero and the distance cutoff.
+
+The number of Gaussians and the hyper parameter $\gamma$ determine the resolution of the filter.
+
+### Periodic boundary conditions
+
+Each atom-wise feature vector $\mathbf{x}_{i}$ has to be equivalent across all periodic repetitions.
+
+Given a filter $\tilde{W}^l\left( \mathbf{r}_{jb}-\mathbf{r}_{ia} \right)$ over all atoms with $\lVert \mathbf{r}_{jb}-\mathbf{r}_{ia} \rVert < r_{\text{cut}}$:
+
+$$
+\begin{aligned}
+	\mathbf{x}_{i}^{l+1}&=\mathbf{x}_{im}^{l+1}=\frac{1}{n_{\text{neighbors\,\,}}}\sum_{j,n}{\mathbf{x}_{jn}^{l}}\circ \tilde{W}^l\left( \mathbf{r}_{jn}-\mathbf{r}_{im} \right)\\
+	&=\frac{1}{n_{\text{neighbors\,\,}}}\sum_j{\mathbf{x}_{j}^{l}}\circ \underset{W}{\underbrace{\left( \sum_n{\tilde{W}}^l\left( \mathbf{r}_{jn}-\mathbf{r}_{im} \right) \right) }},\\
+\end{aligned}
+$$
+- $a, b$: unit cell.
+
+More stable when normalizing the filter response $\textbf x_i^{l+1}$ by the number of atoms within the cutoff range.
+
+## Property prediction
+Compute atom-wise contributions $\hat P_i$ from the fully-connected prediction network.
+
+Calculate the final prediction $\hat P$ by summing (intensive) or averaging (extensive) over the atomic contributions, respectively.
+
+As SchNet yields rotationally invariant energy predictions, the force predictions are rotationally equivariant by construction.
+
+Predicting atomic forces:
+
+$$
+\begin{aligned}
+	\mathbf{\hat{F}}_i\left( Z_1,...,Z_n,\mathbf{r}_1,...,\mathbf{r}_n \right) &=-\frac{\partial \hat{E}}{\partial \mathbf{r}_i}\left( Z_1,...,Z_n,\mathbf{r}_1,...,\mathbf{r}_n \right).\\
+\end{aligned}
+$$
+# Training
+
+Train SchNet for each property target $P$ by minimizing the squared loss:
+
+$$
+\ell(\hat{P}, P)=\|P-\hat{P}\|^2.
+$$
+
+Train energies and forces with combined loss:
+
+$$
+\left.\ell\left(\left(\hat{E}, \hat{\mathbf{F}}_1, \ldots, \hat{\mathbf{F}}_n\right)\right),\left(E, \mathbf{F}_1, \ldots, \mathbf{F}_n\right)\right)=\rho\|E-\hat{E}\|^2+\frac{1}{n_{\text {atoms }}} \sum_{i=0}^{n_{\text {atoms }}}\left\|\mathbf{F}_i-\left(-\frac{\partial \hat{E}}{\partial \mathbf{R}_i}\right)\right\|^2.
+$$
+- $\rho$ : trade-off between energy and force loss.
+
+In each experiment, we split the data into a training set of given size $N$ and use a validation set for early stopping.
+
+Remaining data is used for computing the test errors.
