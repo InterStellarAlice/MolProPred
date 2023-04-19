@@ -6,3 +6,5 @@
 * The phonetic symbols for MolProPred are /mɑlproʊprɛd/.
 
 * Good luck. :-)
+
+* AI extensions used in this project: [Genie-AI](https://github.com/ai-genie/chatgpt-vscode), [Github Copilot](https://docs.github.com/en/copilot) for code testing, [New Bing](https://www.bing.com/new?cc=sg&setlang=zh-hans) for literature search, [chatgpt_academic](https://github.com/binary-husky/chatgpt_academic) for fun.
