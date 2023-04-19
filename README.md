@@ -1,3 +1,25 @@
+- [MolProPred](#molpropred)
+- [Message Passing Graph Neural Network](#message-passing-graph-neural-network)
+  * [Initializing a Graph](#initializing-a-graph)
+  * [Message Passing Function](#message-passing-function)
+  * [Readout Operation](#readout-operation)
+- [Molecular Graph Neural Networks](#molecular-graph-neural-networks)
+  * [1D String Representation](#1d-string-representation)
+  * [2D Graph Representation](#2d-graph-representation)
+  * [Converting Molecules to 3D Euclidean Space](#converting-molecules-to-3d-euclidean-space)
+- [Introduction to SchNet](#introduction-to-schnet)
+  * [Method](#method)
+  * [Molecular representation](#molecular-representation)
+  * [Atom-wise layers](#atom-wise-layers)
+  * [Interaction blocks](#interaction-blocks)
+  * [Filter-generating networks](#filter-generating-networks)
+    + [Rotationally invariant](#rotationally-invariant)
+    + [Periodic boundary conditions](#periodic-boundary-conditions)
+  * [Property prediction](#property-prediction)
+  * [Training](#training)
+
+
+
 # MolProPred
 
 This project entails an exploration of [Kaggle's competition](https://www.kaggle.com/competitions/champs-scalar-coupling/overview), centered on the prediction of molecular properties. Furthermore, we are gaining expertise in employing the [SchNet](https://github.com/atomistic-machine-learning/schnetpack) graph neural network package to derive these properties. The primary program is modeled after the [22nd solution](https://www.kaggle.com/competitions/champs-scalar-coupling/discussion/106424) on the leaderboard, with the aim of enhancing our understanding. Our ranking stands at approximately 1380 out of 2690 in comparison to all participating entities. 
@@ -146,6 +168,7 @@ $$
 $$
 
 Activation functions: shifted softplus:
+
 $$
 \operatorname{ssp}(x)=\ln(0.5 \mathrm{e}^x+0.5).
 $$
@@ -188,7 +211,7 @@ The number of Gaussians and the hyper parameter $\gamma$ determine the resolutio
 
 Each atom-wise feature vector $\mathbf{x}_{i}$ has to be equivalent across all periodic repetitions.
 
-Given a filter $\tilde{W}^l\left( \mathbf{r}_{jb}-\mathbf{r}_{ia} \right)$ over all atoms with $\lVert \mathbf{r}_{jb}-\mathbf{r}_{ia} \rVert < r_{\text{cut}}$:
+Given a filter $\tilde{W}^l(\boldsymbol{r}_{jb}-\boldsymbol{r}_{ia})$ over all atoms with $\lVert \boldsymbol{r}_{jb}-\boldsymbol{r}_{ia} \rVert < r_{\text{cut}}$:
 
 $$
 \begin{aligned}
@@ -214,7 +237,7 @@ $$
 	\mathbf{\hat{F}}_i\left( Z_1,...,Z_n,\mathbf{r}_1,...,\mathbf{r}_n \right) &=-\frac{\partial \hat{E}}{\partial \mathbf{r}_i}\left( Z_1,...,Z_n,\mathbf{r}_1,...,\mathbf{r}_n \right).\\
 \end{aligned}
 $$
-# Training
+## Training
 
 Train SchNet for each property target $P$ by minimizing the squared loss:
 
